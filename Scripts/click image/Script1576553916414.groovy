@@ -26,3 +26,4 @@ WebUI.clickImage(image)
 
 WebUI.verifyTextPresent('The image is clicked', false)
 
+assert false
