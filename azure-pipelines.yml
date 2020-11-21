@@ -21,7 +21,7 @@ steps:
     connection: 'github.com_huynguyen2908'
     userRepository: 'katalon-studio/katalon-studio'
     defaultVersionType: 'latest'
-    itemPattern: 'Katalon_Studio_Engine_Windows_64-${VERSION}.zip'
+    itemPattern: 'Katalon_Studio_Engine_Windows_64-*.zip'
     downloadPath: '$(TMP_DIR)'
   displayName: Download KRE
 
