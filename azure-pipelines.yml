@@ -16,26 +16,25 @@ variables:
   VERSION: 7.7.2
 
 steps:
-- task: S3Download@1
+- task: DownloadGitHubRelease@0
   inputs:
-    awsCredentials: 'aws'
-    regionName: 'us-east-1'
-    bucketName: 'katalon'
-    sourceFolder: '$(VERSION)'
-    globExpressions: '@(Katalon_Studio_Engine_Windows_64)*.zip'
-    targetFolder: '$(TMP_DIR)'
+    connection: 'github.com_huynguyen2908'
+    userRepository: 'katalon-studio/katalon-studio'
+    defaultVersionType: 'latest'
+    itemPattern: 'Katalon_Studio_Engine_Windows_64-${VERSION}.zip'
+    downloadPath: '$(TMP_DIR)'
   displayName: Download KRE
-  
+
 - bash: |
     set -xe
-    cd ${TMP_DIR}/${VERSION}
+    cd ${TMP_DIR}
     unzip Katalon_Studio_Engine_Windows_64-${VERSION}.zip
   displayName: Extract KRE
 
 - bash: |
     set -xe
     mkdir "${REPORT_DIR}"
-    katalonc="${TMP_DIR}/${VERSION}/Katalon_Studio_Engine_Windows_64-${VERSION}/katalonc"
+    katalonc="${TMP_DIR}/Katalon_Studio_Engine_Windows_64-${VERSION}/katalonc"
     "$katalonc" -noSplash -runMode=console -retry=0 -apiKey="f3238a54-e902-4dd0-8122-c15933ffad19" -projectPath="${WORK_DIR}/web-samples/web-samples.prj" -reportFolder="${REPORT_DIR}" -testSuitePath="Test Suites/QTest" -executionProfile="default" -browserType="Chrome" --config -webui.autoUpdateDrivers=${AUTO_UPDATE_WEBDRIVERS}
   displayName: Run Web UI Test
 - task: PublishTestResults@2
