@@ -43,6 +43,7 @@ steps:
     katalonc="${TMP_DIR}/Katalon_Studio_Engine_Windows_64-${VERSION}/katalonc"
     "$katalonc" -noSplash -runMode=console -retry=0 -apiKey="f3238a54-e902-4dd0-8122-c15933ffad19" -projectPath="${WORK_DIR}/web-samples.prj" -reportFolder="${REPORT_DIR}" -testSuitePath="Test Suites/WebUI Builtin Keywords Test" -executionProfile="default" -browserType="Chrome" --config -webui.autoUpdateDrivers=true
   displayName: Run Web UI Test
+  condition: always()
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
