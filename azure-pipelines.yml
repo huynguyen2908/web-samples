@@ -7,13 +7,40 @@ trigger:
 - master
 
 pool:
-  vmImage: 'macos-latest'
+  vmImage: 'windows-latest'
+
+variables:
+  TMP_DIR: $(Build.ArtifactStagingDirectory)
+  WORK_DIR: $(Build.Repository.LocalPath)
+  REPORT_DIR: $(Build.ArtifactStagingDirectory)/katalon-report
+  VERSION: 7.7.2
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: S3Download@1
+  inputs:
+    awsCredentials: 'aws'
+    regionName: 'us-east-1'
+    bucketName: 'katalon'
+    sourceFolder: '$(VERSION)'
+    globExpressions: '@(Katalon_Studio_Engine_Windows_64)*.zip'
+    targetFolder: '$(TMP_DIR)'
+  displayName: Download KRE
+  
+- bash: |
+    set -xe
+    cd ${TMP_DIR}/${VERSION}
+    unzip Katalon_Studio_Engine_Windows_64-${VERSION}.zip
+  displayName: Extract KRE
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- bash: |
+    set -xe
+    mkdir "${REPORT_DIR}"
+    katalonc="${TMP_DIR}/${VERSION}/Katalon_Studio_Engine_Windows_64-${VERSION}/katalonc"
+    "$katalonc" -noSplash -runMode=console -retry=0 -apiKey="f3238a54-e902-4dd0-8122-c15933ffad19" -projectPath="${WORK_DIR}/web-samples/web-samples.prj" -reportFolder="${REPORT_DIR}" -testSuitePath="Test Suites/QTest" -executionProfile="default" -browserType="Chrome" --config -webui.autoUpdateDrivers=${AUTO_UPDATE_WEBDRIVERS}
+  displayName: Run Web UI Test
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/JUnit_Report.xml'
+    searchFolder: '$(REPORT_DIR)'
+    testRunTitle: 'Run Web UI tests'
